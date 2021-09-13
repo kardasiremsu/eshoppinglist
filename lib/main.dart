@@ -1,8 +1,9 @@
 import 'food_information.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-//import 'CategoriesArgument.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'constants.dart';
+import 'delete_methods.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,6 +31,9 @@ class MyApp extends StatelessWidget {
         }
         if(settings.name == ShoppingCartPage.routeName){
           return MaterialPageRoute(builder: (context) => ShoppingCartPage());//ettings.arguments as ShoppingCartArgument
+        }
+        if(settings.name == ShoppingCartFoodPage.routeName){
+          return MaterialPageRoute(builder: (context) => ShoppingCartFoodPage());//ettings.arguments as ShoppingCartArgument
         }
         return null;
       },
@@ -210,8 +214,7 @@ class FoodCategories extends StatelessWidget {
 }
 
 class FoodPage extends StatefulWidget {
-  static String routeName = '/SoupPage';
-
+  static String routeName = '/FoodPage';
   final int foodIndex;
   FoodPage(this.foodIndex);
   @override
@@ -243,13 +246,21 @@ class _FoodPageState extends State<FoodPage> {
                           height: 25,
                           minWidth: 100,
                           onPressed: () {
+                             if(Data.takenShoppingList.containsKey(foods[index])){
+                               Data.takenShoppingList[foods[index]] = Data.takenShoppingList[foods[index]]!+1;
+                             }
+                             else{
+                               Data.takenShoppingList[foods[index]] = 1;
+                             }
                             for (int i = 0; i < foods[index].ingredients.length; i++) {
                               if (Data.shoppingCart.contains(foods[index].ingredients[i])) {
+                                print('eklenen: ${foods[index].ingredients[i].name}');
                                 foods[index].ingredients[i].quantity++;
                               }
                               else {
                                 foods[index].ingredients[i].quantity++;
                                 Data.shoppingCart.add(foods[index].ingredients[i]);
+                                print('eklenen: ${foods[index].ingredients[i].name}');
                               }
                             }
                           },
@@ -269,12 +280,9 @@ class _FoodPageState extends State<FoodPage> {
 }
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget{ //App Bar oluşturmak için
-
   MyAppBar({Key? key}) : preferredSize = Size.fromHeight(kToolbarHeight), super(key: key);
-
   @override
   final Size preferredSize; // default is 56.0
-
   @override
   _MyAppBarState createState() => _MyAppBarState();
 }
@@ -314,21 +322,174 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> { //Listedekileri b
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: MyAppBar(),
-        body: ListView.builder(
-          itemCount: Data.shoppingCart.length,
-          itemBuilder: (context, index) {
-            return Card(
-              child: Container(
-                child: Column(
-                  children: [
-                    ListTile(leading: Text(Data.shoppingCart[index].quantity.toString()),title: Text(Data.shoppingCart[index].name)),
-                  ],
-                ),
-              ),
+        body: 
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            new Expanded(
+              child: ListView.builder(
+                itemCount: Data.shoppingCart.length,
+                itemBuilder: (context, index) {
+                  Ingrediendt ingredient = Data.shoppingCart[index];
+                  return Dismissible( //sağa kaydırarak silme özelliği
+                    key: Key(ingredient.name),
+                        child:
+                          Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: ListTile(tileColor:Colors.yellow[100], leading: Text(Data.shoppingCart[index].quantity.toString()),title: Text(Data.shoppingCart[index].name),),
+                          ),
+                      );
+                  },
+                    ),
+            ),
+            FlatButton(color:Colors.blueGrey[200], onPressed: (){Navigator.pushNamed(context, ShoppingCartFoodPage.routeName);}, child: Text('Eklenen yemekleri düzenle',style: TextStyle(fontFamily: 'ChakraPetch',fontWeight: FontWeight.bold)),),
+          ],
+        ),
             );
-          },
-        )
-    );
-
+          }
   }
-}
+
+  class ShoppingCartFoodPage extends StatefulWidget {
+    static String routeName = '/ShoppingCartFoodPage';
+    const ShoppingCartFoodPage({Key? key}) : super(key: key);
+
+    @override
+    _ShoppingCartFoodPageState createState() => _ShoppingCartFoodPageState();
+  }
+
+  class _ShoppingCartFoodPageState extends State<ShoppingCartFoodPage> {
+    @override
+    Widget build(BuildContext context) {
+      return  Scaffold(
+        appBar: MyAppBar(),
+        body: ListView.builder(
+
+            itemCount: Data.takenShoppingList.keys.length,
+            itemBuilder: (context, int index) {
+              return Slidable(
+
+                secondaryActions: <Widget>[
+                  IconSlideAction(
+                      icon: FontAwesomeIcons.minus,
+                      caption: 'Azalt',
+                      color: Colors.blue,
+                      //not defined closeOnTap so list will get closed when clicked
+                      onTap: () {
+                        setState(() {
+                          if(Data.takenShoppingList[Data.takenShoppingList.keys.elementAt(index)] == 1){ //Tek kaldıysa listeden sil
+                            Data.takenShoppingList.remove(Data.takenShoppingList.keys.elementAt(index));
+                            deleteIngredient(index);
+                          }
+                          else{  //Birden fazlaysa quantityi azalt
+                            Data.takenShoppingList[Data.takenShoppingList.keys.elementAt(index)] = (Data.takenShoppingList[Data.takenShoppingList.keys.elementAt(index)]!-1);
+                            deleteIngredient(index);
+                          }
+                        });
+                      }
+                  ),
+                  IconSlideAction(
+                      icon: Icons.clear,
+                      color: Colors.red,
+                      caption: 'Sil',
+                      closeOnTap: false, //list will not close on tap
+                      onTap: () {
+                        setState(() {
+
+                          for(int j=0; j< Data.takenShoppingList.values.elementAt(index).toInt(); j++){
+                            deleteIngredient(index);
+                          }
+                          Data.takenShoppingList.remove(Data.takenShoppingList.keys.elementAt(index));
+                        });
+                      }
+                  )
+                ],
+                child: ListTile(
+                  leading: Text(Data.takenShoppingList.values.elementAt(index).toString()),
+                  title: Text("${Data.takenShoppingList.keys.elementAt(index).name}"), //Text("${items[index]}"),
+                  //subtitle: Text(""),
+                  trailing: Icon(FontAwesomeIcons.eraser),
+                ),
+                actionPane: SlidableDrawerActionPane(),
+              );
+            }),
+      );
+   
+    }
+  }
+
+
+/*ListView.builder(
+            itemCount: Data.takenShoppingList.keys.length,
+            itemBuilder: (context, index) {
+              Food food = Data.takenShoppingList.keys.elementAt(index);
+               return Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Slidable(actionPane: SlidableScrollActionPane(), actions:
+                  [IconSlideAction(caption:'Azalt', icon: FontAwesomeIcons.minus,onTap: (){setState(() {
+                    if(Data.takenShoppingList.values.elementAt(index) >1){
+                      Data.takenShoppingList[Data.takenShoppingList.keys.elementAt(index)] = (Data.takenShoppingList[Data.takenShoppingList.keys.elementAt(index)]!-1);
+                    }
+                    else{
+                      Data.takenShoppingList.remove(Data.takenShoppingList.keys.elementAt(index));
+                    }
+                    for (int i = 0; i < Data.takenShoppingList.keys.elementAt(index).ingredients.length; i++) {
+                      if(Data.takenShoppingList.keys.elementAt(index).ingredients[i].quantity>1){
+                        print("azaltma");
+                        Data.takenShoppingList.keys.elementAt(index).ingredients[i].quantity--;
+                      }
+                      else if(Data.takenShoppingList.keys.elementAt(index).ingredients[i].quantity==1){
+                        print("silme");
+                        Data.shoppingCart.remove(Data.takenShoppingList.keys.elementAt(index).ingredients[i]);
+                      }}
+                  });
+
+                  },)]
+                      ,child: ListTile(tileColor:Colors.yellow[100], leading: Text(Data.takenShoppingList.values.elementAt(index).toString()),title: Text(Data.takenShoppingList.keys.elementAt(index).name),)),
+                );
+            },
+          ),*/
+  /*Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+        new Expanded(
+          child: ListView.builder(
+            itemCount: Data.takenShoppingList.keys.length,
+            itemBuilder: (context, index) {
+              Food food = Data.takenShoppingList.keys.elementAt(index);
+
+
+              return Dismissible( //sağa kaydırarak silme özelliği
+                onDismissed: (direction){
+                  print("Index: $index");
+                  setState(() {
+
+
+                    for (int i = 0; i < Data.takenShoppingList.keys.elementAt(index).ingredients.length; i++) {
+                      if(Data.takenShoppingList.keys.elementAt(index).ingredients[i].quantity ==1){
+                        Data.shoppingCart.remove(Data.takenShoppingList.keys.elementAt(index).ingredients[i]);
+                        print("Çıkarılan ${Data.takenShoppingList.keys.elementAt(index).ingredients[i].name}");
+                      }
+                      else{
+                        Data.takenShoppingList.keys.elementAt(index).ingredients[i].quantity--;
+                        print("Azaltılan ${Data.takenShoppingList.keys.elementAt(index).ingredients[i].name}, Quantity: ${Data.takenShoppingList.keys.elementAt(index).ingredients[i].quantity}");
+                      }
+                    }
+                    Data.takenShoppingList.remove(Data.takenShoppingList.keys.elementAt(index));
+                    print("Çıkarılan ${Data.takenShoppingList.keys.elementAt(index).name}");
+                  });
+                },
+                key: Key(food.name),
+                child:
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Slidable(actionPane: SlidableScrollActionPane(), actions: [IconSlideAction(caption:'Azalt', icon: FontAwesomeIcons.minus,onTap: (){},)],child: ListTile(tileColor:Colors.yellow[100], leading: Text(Data.takenShoppingList.values.elementAt(index).toString()),title: Text(Data.takenShoppingList.keys.elementAt(index).name),)),
+                ),
+
+              );
+            },
+          ),
+        ),
+      ],
+      ),*/
