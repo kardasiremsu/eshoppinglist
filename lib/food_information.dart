@@ -22,13 +22,14 @@ class Category{
 }
 
 class Data{
+  static List<String> shoppingCartNames = [];
   static List<Ingrediendt> ingredients = getIngredients();
   static List<Food> soups = getSoups();
   static List<Food> mainfoods = getMainFood();
   static Map<Food,int> takenShoppingList = new Map<Food,int>();
   static List<Ingrediendt> shoppingCart = List<Ingrediendt>.empty(growable: true);
   static List<Category> categories = getCategories();
-  static double numberOfPerson = 0;
+  static double numberOfPerson = 2;
   static List<Category> getCategories() => <Category>[
     new Category(id: 0, name: 'Çorbalar', foods: soups),
     new Category(id: 1, name:'Ana Yemekler', foods: mainfoods),
@@ -51,52 +52,59 @@ class Data{
     new Ingrediendt(id: 11, name: 'Tavuk', quantity: 0),
   ];
   static List<Food> getSoups() => <Food>[
-    new Food(id: 0, name: 'Mercimek Çorbası', ingredients: <Ingrediendt>[ ingredients[0], ingredients[1], ingredients[8],ingredients[9]],
+    new Food(id: 0, name: 'Mercimek Çorbası', ingredients:
+    //<Ingrediendt>[ ingredients[0], ingredients[1], ingredients[8],ingredients[9]],
     //<int>[0,1,8,9],
-    // <Ingrediendt>[
-    //   new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 50),
-    //   new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
-    //   new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
-    //   new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
+    <Ingrediendt>[
+      new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 100),
+      new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
+      new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
+      new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
         image: 'assets/images/foto0.jpg'),
-    new Food(id: 1, name: 'Ezogelin Çorbası', ingredients: <Ingrediendt>[ ingredients[10], ingredients[1], ingredients[4]],
+
+    new Food(id: 1, name: 'Ezogelin Çorbası', ingredients:
+    //<Ingrediendt>[ ingredients[10], ingredients[12], ingredients[4]],
     //<int>[1,10,4],
-    // <Ingrediendt>[new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 100),
-    //   new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
-    //   new Ingrediendt(id: ingredients[10].id, name: ingredients[10].name, quantity: 100),
-    //   new Ingrediendt(id: ingredients[4].id, name: ingredients[4].name, quantity: 10)],
+    <Ingrediendt>[new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 100),
+      new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
+      new Ingrediendt(id: ingredients[10].id, name: ingredients[10].name, quantity: 100),
+      new Ingrediendt(id: ingredients[4].id, name: ingredients[4].name, quantity: 10)],
         image: 'assets/images/foto1.jpg'),
     new Food(id: 2, name: 'Tavuk Suyu Çorbası', ingredients:
-     <Ingrediendt>[ ingredients[0], ingredients[11], ingredients[4]],
-    //   new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
-    //   new Ingrediendt(id: ingredients[11].id, name: ingredients[11].name, quantity: 200),
-    //   new Ingrediendt(id: ingredients[4].id, name: ingredients[4].name, quantity: 10)],
+     //<Ingrediendt>[ ingredients[0], ingredients[11], ingredients[4]],
+     <Ingrediendt>[
+    new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
+      new Ingrediendt(id: ingredients[11].id, name: ingredients[11].name, quantity: 200),
+      new Ingrediendt(id: ingredients[4].id, name: ingredients[4].name, quantity: 10)],
         image: 'assets/images/foto2.jpg')
   ];
   static List<Food> getMainFood() => <Food>[
-    new Food(id: 0, name: 'Karnı Yarık', ingredients: <Ingrediendt>[ ingredients[2], ingredients[5], ingredients[8]],
+    new Food(id: 0, name: 'Karnı Yarık', ingredients:
+    //<Ingrediendt>[ ingredients[2], ingredients[5], ingredients[8]],
     //<int>[0,1,8,9],
-    // <Ingrediendt>[
-    //   new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 50),
-    //   new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
-    //   new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
-    //   new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
+    <Ingrediendt>[
+      new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 50),
+      new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
+      new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
+      new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
         image: 'assets/images/foto100.jpg'),
-    new Food(id: 1, name: 'Pilav', ingredients: <Ingrediendt>[ ingredients[0], ingredients[7], ingredients[3]],
+    new Food(id: 1, name: 'Pilav', ingredients:
+    //<Ingrediendt>[ ingredients[0], ingredients[7], ingredients[3]],
     //<int>[0,1,8,9],
-    // <Ingrediendt>[
-    //   new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 50),
-    //   new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
-    //   new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
-    //   new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
+    <Ingrediendt>[
+      new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 50),
+      new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
+      new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
+      new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
         image: 'assets/images/foto101.jpg'),
-    new Food(id: 2, name: 'Nohut Yemeği', ingredients: <Ingrediendt>[ ingredients[0], ingredients[1], ingredients[8], ingredients[9]],
+    new Food(id: 2, name: 'Nohut Yemeği', ingredients:
+    //<Ingrediendt>[ ingredients[0], ingredients[1], ingredients[8], ingredients[9]],
     //<int>[0,1,8,9],
-    // <Ingrediendt>[
-    //   new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 50),
-    //   new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
-    //   new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
-    //   new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
+    <Ingrediendt>[
+      new Ingrediendt(id: ingredients[0].id, name: ingredients[0].name, quantity: 50),
+      new Ingrediendt(id: ingredients[1].id, name: ingredients[1].name, quantity: 10),
+      new Ingrediendt(id: ingredients[8].id, name: ingredients[8].name, quantity: 100),
+      new Ingrediendt(id: ingredients[9].id, name: ingredients[9].name, quantity: 50)],
         image: 'assets/images/foto102.jpg')
   ];
 

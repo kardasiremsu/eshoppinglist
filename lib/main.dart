@@ -1,3 +1,8 @@
+import 'dart:math';
+
+import 'package:flutter/services.dart';
+
+import 'add_methods.dart';
 import 'food_information.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -24,7 +29,7 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(builder: (context) => MyHomePage());
         }
         if(settings.name == FoodCategories.routeName){
-          return MaterialPageRoute(builder: (context) => FoodCategories(settings.arguments as double));
+          return MaterialPageRoute(builder: (context) => FoodCategories());
         }
         if(settings.name == FoodPage.routeName){
           return MaterialPageRoute(builder: (context) => FoodPage(settings.arguments as int));
@@ -48,7 +53,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double numberOfPerson = 2;
   int selectedMenu = 0;
   String warning ='';
   @override
@@ -115,19 +119,19 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 OutlinedButton(onPressed: (){setState(() {
-                  numberOfPerson--;
+                  Data.numberOfPerson--;
                 });},child: Icon(FontAwesomeIcons.minus, size:10)),
                 SizedBox(
                   width: 20,
                   height: 10,
                 ),
-                Text(numberOfPerson.round().toString(),style: kMetinStili),
+                Text(Data.numberOfPerson.round().toString(),style: kMetinStili),
                 SizedBox(
                   width: 20,
                   height: 10,
                 ),
                 OutlinedButton(onPressed: (){setState(() {
-                  numberOfPerson++;
+                  Data.numberOfPerson++;
                 });},child: Icon(FontAwesomeIcons.plus, size:10)),
               ],
             ),
@@ -139,16 +143,33 @@ class _MyHomePageState extends State<MyHomePage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)))),
                 onPressed: () {
+
                   setState(() {
-                    {
-                      if(selectedMenu==0)
-                        warning = 'Seçim Yapmalısınız';
-                      if(selectedMenu == 2){
-                        Navigator.pushNamed(context, FoodCategories.routeName,arguments:numberOfPerson);
+                      if(selectedMenu==0){
+                        warning = 'Seçim Yapmalısınız';}
+                      else if(selectedMenu == 2){
+                        Navigator.pushNamed(context, FoodCategories.routeName);}
+                      else {
+                        //TODO:Random seçim için fonksiyonlar
+                        print('Selected menu');
+                        var rng = new Random();
+                        var soups = new List.generate(7, (index) =>
+                            rng.nextInt(
+                                3)); //random olarak 7 tane soups sayısı üretti
+                        var maindishes = new List.generate(
+                            7, (index) => rng.nextInt(3));
+
+                        for (int i = 0; i < 7; i++){
+                          addFood(0, soups[i]);
+                          addIngredient(0, soups[i]);
+
+                          addFood(1, maindishes[i]);
+                          addIngredient(1, maindishes[i]);
+                        }
+                      Navigator.pushNamed(context, ShoppingCartPage.routeName);
                       }
-                    }
-                  });
-                },
+                      });
+                    },
                 child: Text('Oluştur',
                     textAlign: TextAlign.center, style: kMetinStili),
               ),
@@ -163,8 +184,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class FoodCategories extends StatelessWidget {
   static String routeName = '/FoodCategories';
-  final double numberOfPerson;
-  FoodCategories(this.numberOfPerson);
+
+  FoodCategories();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,7 +204,7 @@ class FoodCategories extends StatelessWidget {
           FlatButton(color: Colors.blueGrey, onPressed: (){Navigator.pushNamed(context, FoodPage.routeName,arguments:3);}, child: Text('TATLI', style: TextStyle(fontSize:20, fontFamily: 'ChakraPetch')), shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),),
           Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Text('Kişi Sayısı ${numberOfPerson.round()}', style: kMetinStili),
+            child: Text('Kişi Sayısı ${Data.numberOfPerson.round()}', style: kMetinStili),
           ),
           Padding(
             padding: const EdgeInsets.all(5.0),
@@ -213,6 +234,7 @@ class FoodCategories extends StatelessWidget {
   }
 }
 
+
 class FoodPage extends StatefulWidget {
   static String routeName = '/FoodPage';
   final int foodIndex;
@@ -224,6 +246,7 @@ class FoodPage extends StatefulWidget {
 class _FoodPageState extends State<FoodPage> {
   @override
   Widget build(BuildContext context) {
+
     List<Food> foods = Data.categories[widget.foodIndex].foods;
     return Scaffold(
       appBar: MyAppBar(),
@@ -246,23 +269,30 @@ class _FoodPageState extends State<FoodPage> {
                           height: 25,
                           minWidth: 100,
                           onPressed: () {
-                             if(Data.takenShoppingList.containsKey(foods[index])){
-                               Data.takenShoppingList[foods[index]] = Data.takenShoppingList[foods[index]]!+1;
-                             }
-                             else{
-                               Data.takenShoppingList[foods[index]] = 1;
-                             }
-                            for (int i = 0; i < foods[index].ingredients.length; i++) {
-                              if (Data.shoppingCart.contains(foods[index].ingredients[i])) {
-                                print('eklenen: ${foods[index].ingredients[i].name}');
-                                foods[index].ingredients[i].quantity++;
-                              }
-                              else {
-                                foods[index].ingredients[i].quantity++;
-                                Data.shoppingCart.add(foods[index].ingredients[i]);
-                                print('eklenen: ${foods[index].ingredients[i].name}');
-                              }
-                            }
+                             addFood(widget.foodIndex, index);
+                             addIngredient(widget.foodIndex, index);
+                             // if(Data.takenShoppingList.containsKey(foods[index])){
+                             //   Data.takenShoppingList[foods[index]] = Data.takenShoppingList[foods[index]]!+1; //value 1 arttırma
+                             // }
+                             // else{
+                             //   Data.takenShoppingList[foods[index]] = 1;
+                             // }
+                            // for (int i = 0; i < foods[index].ingredients.length; i++) {
+                            //   if (Data.shoppingCartNames.contains(foods[index].ingredients[i].name)) { //içinde varsa
+                            //     print("Ad ${foods[index].ingredients[i].name}, quantity: ${foods[index].ingredients[i].quantity}");
+                            //     int value = Data.shoppingCartNames.indexOf(foods[index].ingredients[i].name); //hangi indexteyse
+                            //     print("Value= $value");
+                            //     Data.shoppingCart[value].quantity +=Data.numberOfPerson.toInt()*foods[index].ingredients[i].quantity;
+                            //     print('eklenen +: ${Data.shoppingCart[value].name}, quantity: ${Data.shoppingCart[value].quantity}');
+                            //   }
+                            //   else {
+                            //     Data.shoppingCartNames.add(foods[index].ingredients[i].name);
+                            //     //print("Names ${Data.shoppingCartNames[Data.shoppingCartNames.length-1]} eklendi");
+                            //     //print("Ad ${foods[index].ingredients[i].name}, quantity: ${foods[index].ingredients[i].quantity}");
+                            //     Data.shoppingCart.add(Ingrediendt(id: foods[index].ingredients[i].id, name: foods[index].ingredients[i].name, quantity: foods[index].ingredients[i].quantity*Data.numberOfPerson.toInt()));
+                            //     print('eklenen yeni: ${Data.shoppingCart[Data.shoppingCart.length-1].name}, quantity: ${Data.shoppingCart[Data.shoppingCart.length-1].quantity}');
+                            //   }
+                            // }
                           },
                           color: Colors.blueGrey[100],
                           child: Icon(FontAwesomeIcons.plus, size: 10,),),
@@ -317,13 +347,112 @@ class ShoppingCartPage extends StatefulWidget {
   _ShoppingCartPageState createState() => _ShoppingCartPageState();
 }
 
+class FoodListBottom extends StatelessWidget {
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FlatButton(color:Colors.blueGrey[200], onPressed: ()
+        {Navigator.pushNamed(context, ShoppingCartFoodPage.routeName);},
+          child: Text('Eklenen yemekleri düzenle',style: TextStyle(fontFamily: 'ChakraPetch',fontWeight: FontWeight.bold)),),
+      ),
+      FlatButton(color:Colors.blueGrey[200], onPressed: ()
+      {Navigator.pushNamed(context, ShoppingCartFoodPage.routeName);},
+        child: Text('Satın al',style: TextStyle(fontFamily: 'ChakraPetch',fontWeight: FontWeight.bold)),),
+    ],);
+  }
+}
+
 class _ShoppingCartPageState extends State<ShoppingCartPage> { //Listedekileri bastırıyor.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: MyAppBar(),
-        body: 
-        Column(
+
+        bottomNavigationBar: FoodListBottom(),
+        body: ListView.builder(
+            itemCount: Data.shoppingCart.length,
+            itemBuilder: (context, int index) {
+              return Slidable(
+
+                secondaryActions: <Widget>[
+                  IconSlideAction(
+                      icon: FontAwesomeIcons.minus,
+                      caption: 'Azalt',
+                      color: Colors.blue,
+                      //not defined closeOnTap so list will get closed when clicked
+                      onTap: () async {
+                        int intvalue =0;
+                        await showDialog(
+                            context: context,
+                            builder: (BuildContext context)=>AlertDialog(
+                              title: new Text(
+                                'Ne kadar azaltmak istiyorsanız girin',
+                                style: kMetinStili,
+                              ),
+                              content:TextField(
+
+                                onChanged:(String value) async {
+                                  intvalue = int.parse(value);
+                                },
+                                decoration: InputDecoration(
+                                  hintText: 'Miktar',
+                                ),keyboardType: TextInputType.number,inputFormatters:<TextInputFormatter>[ FilteringTextInputFormatter.digitsOnly],
+                              ),
+
+
+                              actions: [
+                                TextButton(onPressed: (){  setState(() {
+
+                                if(Data.shoppingCart[index].quantity-intvalue <= 0){ //Tek kaldıysa listeden sil
+                                  Data.shoppingCart.removeAt(index);
+                                }
+                                else{  //Birden fazlaysa quantityi verilen miktar kadar azalt
+                                  Data.shoppingCart[index].quantity-= intvalue; //Valueyu  yapılacak
+                                }
+                              });
+                              Navigator.pop(context);
+                              }, child: Text('Azalt', style: kMetinStili,))],
+                            ));
+                      }
+                  ),
+                  IconSlideAction(
+                      icon: Icons.clear,
+                      color: Colors.red,
+                      caption: 'Sil',
+                      closeOnTap: false, //list will not close on tap
+                      onTap: () {
+                        setState(() {
+                          Data.shoppingCart.removeAt(index);
+                        });
+                      }
+                  )
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    tileColor:Colors.yellow[100],
+                    leading: Text(Data.shoppingCart[index].quantity.toString()),
+                    title: Text(Data.shoppingCart[index].name), //Text("${items[index]}"),
+                    //subtitle: Text(""),
+                    trailing: Icon(FontAwesomeIcons.eraser),
+                  ),
+                ),
+                actionPane: SlidableDrawerActionPane(),
+              );
+            }),
+
+            );
+          }
+  }
+
+
+  /*Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -345,11 +474,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> { //Listedekileri b
             ),
             FlatButton(color:Colors.blueGrey[200], onPressed: (){Navigator.pushNamed(context, ShoppingCartFoodPage.routeName);}, child: Text('Eklenen yemekleri düzenle',style: TextStyle(fontFamily: 'ChakraPetch',fontWeight: FontWeight.bold)),),
           ],
-        ),
-            );
-          }
-  }
-
+        ),*/
   class ShoppingCartFoodPage extends StatefulWidget {
     static String routeName = '/ShoppingCartFoodPage';
     const ShoppingCartFoodPage({Key? key}) : super(key: key);
@@ -363,6 +488,9 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> { //Listedekileri b
     Widget build(BuildContext context) {
       return  Scaffold(
         appBar: MyAppBar(),
+        bottomNavigationBar: FlatButton(color:Colors.blueGrey[200], onPressed: ()
+        {Navigator.pushNamed(context, ShoppingCartPage.routeName);},
+          child: Text('İçeriği düzenle',style: TextStyle(fontFamily: 'ChakraPetch',fontWeight: FontWeight.bold)),),
         body: ListView.builder(
 
             itemCount: Data.takenShoppingList.keys.length,
@@ -395,7 +523,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> { //Listedekileri b
                       closeOnTap: false, //list will not close on tap
                       onTap: () {
                         setState(() {
-
                           for(int j=0; j< Data.takenShoppingList.values.elementAt(index).toInt(); j++){
                             deleteIngredient(index);
                           }
